@@ -10,6 +10,15 @@ public class OreMinedEventArgs : EventArgs
     public string CharacterName { get; init; } = "";
     public string OreName { get; init; } = "";
     public double Quantity { get; init; }
+    public bool IsCritical { get; init; }
+}
+
+public class OreResidueEventArgs : EventArgs
+{
+    public string CharacterName { get; init; } = "";
+    /// <summary>The residue log line names no ore, so this is the last ore the character mined.</summary>
+    public string? OreName { get; init; }
+    public double Quantity { get; init; }
 }
 
 public class OreCompressedEventArgs : EventArgs
@@ -27,6 +36,10 @@ public class GameLogMonitor
         @"\(mining\).*?You mined.*?>(?<qty>[\d,]+)<.*?units of.*?>(?<ore>[^<]+?)\s*$",
         RegexOptions.Compiled);
 
+    private static readonly Regex ResidueRegex = new(
+        @"\(mining\).*?Additional.*?>(?<qty>[\d,]+)<.*?units depleted from asteroid as residue",
+        RegexOptions.Compiled);
+
     private static readonly Regex CompressionRegex = new(
         @"Successfully compressed (?<ore>.+?) into (?<qty>[\d,]+) Compressed \k<ore>\.?\s*$",
         RegexOptions.Compiled);
@@ -39,6 +52,9 @@ public class GameLogMonitor
 
     public event EventHandler<OreMinedEventArgs>? OreMined;
     public event EventHandler<OreCompressedEventArgs>? OreCompressed;
+    public event EventHandler<OreResidueEventArgs>? OreResidue;
+
+    private readonly Dictionary<string, string> _lastOreByCharacter = new(StringComparer.OrdinalIgnoreCase);
 
     public GameLogMonitor(AppState state)
     {
@@ -191,10 +207,30 @@ public class GameLogMonitor
 
             if (double.TryParse(qtyText, out var qty))
             {
+                _lastOreByCharacter[character.Name] = oreName;
                 OreMined?.Invoke(this, new OreMinedEventArgs
                 {
                     CharacterName = character.Name,
                     OreName = oreName,
+                    Quantity = qty,
+                    IsCritical = line.Contains("Critical mining success", StringComparison.OrdinalIgnoreCase)
+                });
+            }
+
+            return;
+        }
+
+        var residueMatch = ResidueRegex.Match(line);
+        if (residueMatch.Success)
+        {
+            var qtyText = residueMatch.Groups["qty"].Value.Replace(",", "");
+            if (double.TryParse(qtyText, out var qty))
+            {
+                _lastOreByCharacter.TryGetValue(character.Name, out var lastOre);
+                OreResidue?.Invoke(this, new OreResidueEventArgs
+                {
+                    CharacterName = character.Name,
+                    OreName = lastOre,
                     Quantity = qty
                 });
             }

@@ -93,12 +93,14 @@
             <!-- Header: drag area + square buttons (red = placeholder, orange = empty all, purple = options) -->
             <Grid Height="20" Background="#000000">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0">
+                    <Button Style="{StaticResource HeaderSquareButton}" Foreground="#a259d9"
+                            ToolTip="Empty all cargo" Click="ClearAllCargo_Click"/>
+                    <Button Style="{StaticResource HeaderSquareButton}" Foreground="#f29a1f"
+                            ToolTip="Statistics" Click="Statistics_Click"/>
+                    <Button Style="{StaticResource HeaderSquareButton}" Foreground="#ffffff"
+                            ToolTip="Options" Click="Settings_Click"/>
                     <Button Style="{StaticResource HeaderSquareButton}" Foreground="#e03a2f"
                             ToolTip="Close" Click="Close_Click"/>
-                    <Button Style="{StaticResource HeaderSquareButton}" Foreground="#f29a1f"
-                            ToolTip="Empty all cargo" Click="ClearAllCargo_Click"/>
-                    <Button Style="{StaticResource HeaderSquareButton}" Foreground="#a259d9"
-                            ToolTip="Options" Click="Settings_Click"/>
                 </StackPanel>
             </Grid>
 

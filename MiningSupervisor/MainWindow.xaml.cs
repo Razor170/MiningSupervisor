@@ -15,8 +15,24 @@ public partial class MainWindow : Window
         DataContext = _viewModel;
         CharacterList.ItemsSource = _viewModel.Characters;
         Closing += (_, _) => _viewModel.SaveNow();
+        Closed += (_, _) => _statisticsWindow?.Close();
 
         Topmost = _viewModel.StayOnTop;
+    }
+
+    private StatisticsWindow? _statisticsWindow;
+
+    private void Statistics_Click(object sender, RoutedEventArgs e)
+    {
+        if (_statisticsWindow != null)
+        {
+            _statisticsWindow.Activate();
+            return;
+        }
+
+        _statisticsWindow = new StatisticsWindow(_viewModel.Stats) { Topmost = Topmost };
+        _statisticsWindow.Closed += (_, _) => _statisticsWindow = null;
+        _statisticsWindow.Show();
     }
 
     private void Close_Click(object sender, RoutedEventArgs e) => Close();

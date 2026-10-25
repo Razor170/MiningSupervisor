@@ -10,6 +10,8 @@ public class MainViewModel
     private readonly OreVolumeTable _oreVolumeTable;
     private readonly GameLogMonitor _monitor;
 
+    public SessionStats Stats { get; } = new();
+
     public ObservableCollection<CharacterCardViewModel> Characters { get; } = new();
 
     public RelayCommand AddCharacterCommand { get; }
@@ -21,6 +23,7 @@ public class MainViewModel
         _monitor = new GameLogMonitor(_dataStore.State);
         _monitor.OreMined += OnOreMined;
         _monitor.OreCompressed += OnOreCompressed;
+        _monitor.OreResidue += OnOreResidue;
 
         foreach (var entry in _dataStore.State.Characters)
         {
@@ -88,10 +91,13 @@ public class MainViewModel
             return;
         }
 
+        Stats.MarkOreReceived();
+
         if (_oreVolumeTable.TryGetVolume(e.OreName, out var volumePerUnit))
         {
             vm.UnknownOre = null;
             vm.AddMinedVolume(e.Quantity * volumePerUnit);
+            Stats.AddMined(e.Quantity * volumePerUnit, e.IsCritical);
         }
         else
         {
@@ -99,6 +105,19 @@ public class MainViewModel
         }
 
         _dataStore.RequestSave();
+    }
+
+    private void OnOreResidue(object? sender, OreResidueEventArgs e)
+    {
+        if (!Characters.Any(c => string.Equals(c.Name, e.CharacterName, StringComparison.OrdinalIgnoreCase)))
+        {
+            return;
+        }
+
+        if (e.OreName != null && _oreVolumeTable.TryGetVolume(e.OreName, out var volumePerUnit))
+        {
+            Stats.AddLoss(e.Quantity * volumePerUnit);
+        }
     }
 
     private void OnOreCompressed(object? sender, OreCompressedEventArgs e)
