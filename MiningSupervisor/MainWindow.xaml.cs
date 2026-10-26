@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using MiningSupervisor.Services;
 using MiningSupervisor.ViewModels;
 using MiningSupervisor.Views;
 
@@ -14,8 +15,13 @@ public partial class MainWindow : Window
         InitializeComponent();
         DataContext = _viewModel;
         CharacterList.ItemsSource = _viewModel.Characters;
+        WindowPlacementHelper.Attach(this, _viewModel.State, "Main");
         Closing += (_, _) => _viewModel.SaveNow();
-        Closed += (_, _) => _statisticsWindow?.Close();
+        Closed += (_, _) =>
+        {
+            _statisticsWindow?.Close();
+            _surveyWindow?.Close();
+        };
 
         Topmost = _viewModel.StayOnTop;
     }
@@ -31,8 +37,26 @@ public partial class MainWindow : Window
         }
 
         _statisticsWindow = new StatisticsWindow(_viewModel.Stats) { Topmost = Topmost };
+        WindowPlacementHelper.Attach(_statisticsWindow, _viewModel.State, "Statistics", _viewModel.SaveNow);
         _statisticsWindow.Closed += (_, _) => _statisticsWindow = null;
         _statisticsWindow.Show();
+    }
+
+    private readonly SurveyTracker _surveyTracker = new();
+    private SurveyWindow? _surveyWindow;
+
+    private void Survey_Click(object sender, RoutedEventArgs e)
+    {
+        if (_surveyWindow != null)
+        {
+            _surveyWindow.Activate();
+            return;
+        }
+
+        _surveyWindow = new SurveyWindow(_surveyTracker) { Topmost = Topmost };
+        WindowPlacementHelper.Attach(_surveyWindow, _viewModel.State, "Survey", _viewModel.SaveNow);
+        _surveyWindow.Closed += (_, _) => _surveyWindow = null;
+        _surveyWindow.Show();
     }
 
     private void Close_Click(object sender, RoutedEventArgs e) => Close();
@@ -79,10 +103,15 @@ public partial class MainWindow : Window
     private void Settings_Click(object sender, RoutedEventArgs e)
     {
         SettingsWindow? dialog = null;
-        dialog = new SettingsWindow(_viewModel.State, _viewModel.StayOnTop,
+        dialog = new SettingsWindow(_viewModel.State, _viewModel.StayOnTop, _viewModel.Characters.ToList(),
             () => AddCharacter(dialog!), () => SetAllCargo(dialog!)) { Owner = this };
         if (dialog.ShowDialog() == true)
         {
+            foreach (var character in dialog.CharactersToDelete)
+            {
+                _viewModel.RemoveCharacter(character);
+            }
+
             Topmost = dialog.StayOnTop;
             _viewModel.StayOnTop = dialog.StayOnTop;
             _viewModel.NotifySettingsChanged();

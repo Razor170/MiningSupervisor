@@ -59,9 +59,19 @@ public class GameLogMonitor
     public GameLogMonitor(AppState state)
     {
         _state = state;
-        _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
+        _timer = new DispatcherTimer();
         _timer.Tick += (_, _) => Tick();
+        ApplyPollInterval();
     }
+
+    /// <summary>Re-reads the polling interval from the state.</summary>
+    public void ApplyPollInterval()
+    {
+        _timer.Interval = TimeSpan.FromSeconds(Math.Clamp(_state.PollIntervalSeconds, 0.5, 5));
+    }
+
+    /// <summary>Forget discovered log files, e.g. after the log directory changed.</summary>
+    public void ResetListenerCache() => _listenerCache.Clear();
 
     public void Start() => _timer.Start();
 

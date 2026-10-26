@@ -107,6 +107,21 @@ public class CharacterCardViewModel : INotifyPropertyChanged
         }
     }
 
+    public bool IsHidden
+    {
+        get => _entry.Hidden;
+        set
+        {
+            if (_entry.Hidden == value) return;
+            _entry.Hidden = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(IsShown));
+            _onChanged();
+        }
+    }
+
+    public bool IsShown => !_entry.Hidden;
+
     public bool HasUnknownOre => !string.IsNullOrEmpty(UnknownOre);
 
     public double PercentFull => _entry.CapacityM3 <= 0 ? 0 : Math.Min(100, _entry.CurrentM3 / _entry.CapacityM3 * 100);

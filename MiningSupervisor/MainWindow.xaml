@@ -95,6 +95,8 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,5,0">
                     <Button Style="{StaticResource HeaderSquareButton}" Foreground="#a259d9"
                             ToolTip="Empty all cargo" Click="ClearAllCargo_Click"/>
+                    <Button Style="{StaticResource HeaderSquareButton}" Foreground="#3fb950"
+                            ToolTip="Survey" Click="Survey_Click"/>
                     <Button Style="{StaticResource HeaderSquareButton}" Foreground="#f29a1f"
                             ToolTip="Statistics" Click="Statistics_Click"/>
                     <Button Style="{StaticResource HeaderSquareButton}" Foreground="#ffffff"
@@ -107,7 +109,8 @@
             <ItemsControl x:Name="CharacterList" Margin="3,0,3,3">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="{x:Type vm:CharacterCardViewModel}">
-                        <StackPanel Margin="0,0,0,0" Background="Transparent">
+                        <StackPanel Margin="0,0,0,0" Background="Transparent"
+                                    Visibility="{Binding IsShown, Converter={x:Static local:BoolToVisibilityConverter.Instance}}">
                             <StackPanel.ContextMenu>
                                 <ContextMenu>
                                     <MenuItem Header="Empty Cargo" Command="{Binding EmptyCommand}"/>

@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Settings"
-        Width="360" Height="520"
+        Width="360" SizeToContent="Height"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Background="#1e2124">
@@ -51,6 +51,30 @@
                 <Button Content="Set All Cargo..." Click="SetAllCargo_Click"/>
             </StackPanel>
             <CheckBox x:Name="StayOnTopBox" Content="Stay on top"/>
+            <TextBlock Text="Characters" Style="{StaticResource SectionHeader}" Margin="0,16,0,4"/>
+            <ItemsControl x:Name="CharacterSettingsList">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <DockPanel Margin="0,2">
+                            <Button DockPanel.Dock="Right" Content="Delete" Padding="8,2" Tag="{Binding}" Click="DeleteCharacter_Click"/>
+                            <CheckBox Content="{Binding Name}" IsChecked="{Binding Visible}" Margin="0" VerticalAlignment="Center"
+                                      ToolTip="Show in main window"/>
+                        </DockPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <TextBlock Text="Unchecked characters are hidden but still tracked." FontSize="10" Foreground="#80858a" Margin="0,4,0,0"/>
+            <TextBlock Text="Log file polling rate" Margin="0,12,0,4"/>
+            <ComboBox x:Name="PollIntervalBox" HorizontalAlignment="Left" Width="90"/>
+            <TextBlock Text="Game log folder" Margin="0,12,0,4"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="LogDirectoryBox" VerticalContentAlignment="Center"/>
+                <Button Grid.Column="1" Content="Browse..." Margin="6,0,0,0" Click="BrowseLogDirectory_Click"/>
+            </Grid>
         </StackPanel>
 
         <StackPanel Grid.Row="0" Margin="0,0,0,16">

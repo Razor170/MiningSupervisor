@@ -58,6 +58,9 @@ public class MainViewModel
     /// </summary>
     public void NotifySettingsChanged()
     {
+        _monitor.ResetListenerCache();
+        _monitor.ApplyPollInterval();
+
         foreach (var vm in Characters)
         {
             vm.RefreshSettingsDependent();
